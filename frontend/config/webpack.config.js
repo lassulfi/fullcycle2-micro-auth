@@ -28,6 +28,8 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 
 const createEnvironmentHash = require('./webpack/persistentCache/createEnvironmentHash');
 
+const CopyPlugin = require('copy-webpack-plugin');
+
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
 
@@ -276,12 +278,12 @@ module.exports = function (webpackEnv) {
       // There will be one main bundle, and one file per asynchronous chunk.
       // In development, it does not produce real files.
       filename: isEnvProduction
-        ? 'static/js/[name].[contenthash:8].js'
-        : isEnvDevelopment && 'static/js/bundle.js',
+        ? theme.themeDir + '/js/[name].[contenthash:8].js'
+        : isEnvDevelopment && theme.themeDir + '/js/bundle.js',
       // There are also additional JS chunk files if you use code splitting.
       chunkFilename: isEnvProduction
-        ? 'static/js/[name].[contenthash:8].chunk.js'
-        : isEnvDevelopment && 'static/js/[name].chunk.js',
+        ? theme.themeDir + '/js/[name].[contenthash:8].chunk.js'
+        : isEnvDevelopment && theme.themeDir + '/js/[name].chunk.js',
       assetModuleFilename: 'static/media/[name].[hash][ext]',
       // webpack uses `publicPath` to determine where the app is being served from.
       // It requires a trailing slash, or the file assets will get an incorrect path.
@@ -460,12 +462,12 @@ module.exports = function (webpackEnv) {
                 {
                   loader: require.resolve('file-loader'),
                   options: {
-                    name: 'static/media/[name].[hash].[ext]',
+                    name: 'media/[name].[hash].[ext]',
                   },
                 },
               ],
               issuer: {
-                and: [/\.(ts|tsx|js|jsx|md|mdx)$/],
+                and: [/\.(ts|tsx|js|jsx|md|mdx|ftl)$/],
               },
             },
             // Process application JS with Babel.
@@ -488,9 +490,10 @@ module.exports = function (webpackEnv) {
                 ],
                 
                 plugins: [
-                  isEnvDevelopment &&
-                    shouldUseReactRefresh &&
-                    require.resolve('react-refresh/babel'),
+                  // Hot reload is not required
+                  // isEnvDevelopment &&
+                  //   shouldUseReactRefresh &&
+                  //   require.resolve('react-refresh/babel'),
                 ].filter(Boolean),
                 // This is a feature of `babel-loader` for webpack (not Babel itself).
                 // It enables caching results in ./node_modules/.cache/babel-loader/
@@ -631,31 +634,30 @@ module.exports = function (webpackEnv) {
     },
     plugins: [
       // Generates an `index.html` file with the <script> injected.
-      new HtmlWebpackPlugin(
+      new CopyPlugin({
+        patterns: [
+         {
+          from: path.join(paths.appPublic, theme.themeDir),
+          to: path.join(paths.appBuild, theme.themeDir),
+        },
+        ]
+      }),
+      ...theme.templates.map(template => new HtmlWebpackPlugin(
         Object.assign(
           {},
           {
-            inject: true,
-            template: paths.appHtml,
+            inject: false,
+            template: template.templateSrc,
+            chunks: [
+              template.entry.chunk
+            ],
+            filename: path.join(paths.appBuild, template.templateOut),
           },
-          isEnvProduction
-            ? {
-                minify: {
-                  removeComments: true,
-                  collapseWhitespace: true,
-                  removeRedundantAttributes: true,
-                  useShortDoctype: true,
-                  removeEmptyAttributes: true,
-                  removeStyleLinkTypeAttributes: true,
-                  keepClosingSlash: true,
-                  minifyJS: true,
-                  minifyCSS: true,
-                  minifyURLs: true,
-                },
-              }
-            : undefined
+          {
+            minify: false,
+          }
         )
-      ),
+      )),
       // Inlines the webpack runtime script. This script is too small to warrant
       // a network request.
       // https://github.com/facebook/create-react-app/issues/5358
@@ -679,11 +681,11 @@ module.exports = function (webpackEnv) {
       new webpack.DefinePlugin(env.stringified),
       // Experimental hot reloading for React .
       // https://github.com/facebook/react/tree/main/packages/react-refresh
-      isEnvDevelopment &&
-        shouldUseReactRefresh &&
-        new ReactRefreshWebpackPlugin({
-          overlay: false,
-        }),
+      // isEnvDevelopment &&
+      //   shouldUseReactRefresh &&
+      //   new ReactRefreshWebpackPlugin({
+      //     overlay: false,
+      //   }),
       // Watcher doesn't work well if you mistype casing in a path so we use
       // a plugin that prints an error when you attempt to do this.
       // See https://github.com/facebook/create-react-app/issues/240
@@ -692,8 +694,8 @@ module.exports = function (webpackEnv) {
         new MiniCssExtractPlugin({
           // Options similar to the same options in webpackOptions.output
           // both options are optional
-          filename: 'static/css/[name].[contenthash:8].css',
-          chunkFilename: 'static/css/[name].[contenthash:8].chunk.css',
+          filename: theme.themeDir + 'css/[name].[contenthash:8].css',
+          chunkFilename: theme.themeDir + 'css/[name].[contenthash:8].chunk.css',
         }),
       // Generate an asset manifest file with the following content:
       // - "files" key: Mapping of all asset filenames to their corresponding
