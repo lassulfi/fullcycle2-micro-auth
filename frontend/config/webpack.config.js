@@ -646,12 +646,14 @@ module.exports = function (webpackEnv) {
         Object.assign(
           {},
           {
-            inject: false,
+            inject: true,
             template: template.templateSrc,
             chunks: [
               template.entry.chunk
             ],
             filename: path.join(paths.appBuild, template.templateOut),
+            // eslint-disable-next-line no-template-curly-in-string
+            publicPath: '${url.resourcesCommonPath}/..',
           },
           {
             minify: false,
