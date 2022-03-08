@@ -5,6 +5,9 @@ services:
   app:
     image: quay.io/keycloak/keycloak:11.0.2
     container_name: micro-auth-app
+    volumes:
+      - ./frontend/build/catalog-admin:/opt/jboss/keycloak/themes/catalog-admin
+      - ./keycloak/config/standalone-ha.xml:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
