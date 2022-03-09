@@ -15,14 +15,12 @@ process.on("unhandledRejection", (err) => {
 require("../config/env");
 
 const fs = require("fs");
-const fsExtra = require("fs-extra");
 const chalk = require("react-dev-utils/chalk");
 const webpack = require("webpack");
 const { createCompiler } = require("../config/WebpackDevServerUtils");
 const paths = require("../config/paths");
 const configFactory = require("../config/webpack.config");
 const makeCommonResources = require("./_make-common-resources");
-const path = require("path");
 
 const useYarn = fs.existsSync(paths.yarnLockFile);
 
@@ -65,7 +63,6 @@ createCompiler({
 }).watch({}, (err, stats) => {
   if (err) {
     console.error(err);
-    return ;
   }
 
   console.log(
