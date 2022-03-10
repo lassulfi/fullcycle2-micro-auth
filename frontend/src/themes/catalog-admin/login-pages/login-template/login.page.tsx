@@ -3,15 +3,15 @@ import ReactDOM from 'react-dom';
 import reportWebVitals from '../../../../reportWebVitals';
 import { CssBaseline, MuiThemeProvider } from '@material-ui/core';
 import theme from '../../../../theme';
-import Layout from '../../components/Layout';
+import Layout, { LayoutProps } from '../../components/Layout';
 
-declare const obj: { loginTitle: string };
+declare const layoutProps: LayoutProps;
 
 ReactDOM.render(
     <React.StrictMode>
         <MuiThemeProvider theme={theme}>
             <CssBaseline />
-            <Layout loginTitle={obj.loginTitle}>
+            <Layout {...layoutProps}>
                 Ola Mundo Material UI
             </Layout>
         </MuiThemeProvider>

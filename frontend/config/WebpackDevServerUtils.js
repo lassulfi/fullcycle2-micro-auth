@@ -17,7 +17,7 @@
  const clearConsole = require('react-dev-utils/clearConsole');
  const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
  const getProcessForPort = require('react-dev-utils/getProcessForPort');
- const typescriptFormatter = require('./typescriptFormatter');
+ const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
  const forkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpackPlugin');
  
  const isInteractive = process.stdout.isTTY;
@@ -148,6 +148,21 @@
          tsMessagesResolver = msgs => resolve(msgs);
        });
      });
+ 
+     forkTsCheckerWebpackPlugin
+       .getCompilerHooks(compiler)
+       .receive.tap('afterTypeScriptCheck', (diagnostics, lints) => {
+         const allMsgs = [...diagnostics, ...lints];
+         const format = message =>
+           `${message.file}\n${typescriptFormatter(message, true)}`;
+ 
+         tsMessagesResolver({
+           errors: allMsgs.filter(msg => msg.severity === 'error').map(format),
+           warnings: allMsgs
+             .filter(msg => msg.severity === 'warning')
+             .map(format),
+         });
+       });
    }
  
    // "done" event fires when webpack has finished recompiling the bundle.
@@ -486,4 +501,3 @@
    prepareProxy,
    prepareUrls,
  };
- 

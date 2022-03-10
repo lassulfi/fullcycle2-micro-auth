@@ -1,5 +1,5 @@
 <#import "layout.ftl" as layout>
-<@layout.registrationLayout ; section>
+<@layout.registrationLayout title=msg("doLogin"); section>
     <#if section = 'scripts'>
         <%= htmlWebpackPlugin.tags.bodyTags %>
     </#if>
