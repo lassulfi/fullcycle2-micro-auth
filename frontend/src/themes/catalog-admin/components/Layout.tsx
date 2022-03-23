@@ -2,6 +2,7 @@ import { Box, Card, CardContent, CardHeader, Grid, Theme } from "@material-ui/co
 import { makeStyles } from "@material-ui/styles";
 import LocaleSelect from "./LocaleSelect";
 import { Navbar } from "./Navbar";
+import Alert, { Color } from "@material-ui/lab/Alert"
 
 const useStyles = makeStyles((theme: Theme) => ({
     content: {
@@ -38,10 +39,21 @@ export interface LayoutProps {
         locales: { label: string; url: string; }[]
     };
     title: string;
+    message?: {
+        type: Color;
+        content: string;
+    };
+    isAppInitiatedAction: boolean;
 }
 
 const Layout: React.FunctionComponent<LayoutProps> = (props) => {
-    const { i18nEnabled, locale, title, children } = props;
+    const {
+        i18nEnabled,
+        locale,
+        title,
+        message,
+        isAppInitiatedAction,
+        children } = props;
 
     const classes = useStyles();
 
@@ -70,6 +82,17 @@ const Layout: React.FunctionComponent<LayoutProps> = (props) => {
                                 title={title}
                             />
                             <CardContent>
+                                {message &&
+                                    (message.type !== "warning" || !isAppInitiatedAction) && (
+                                        <Alert
+                                            severity={message.type}
+                                            variant="filled"
+                                            elevation={6}
+                                        >
+                                            {message.content}
+                                        </Alert>
+                                    )
+                                }
                                 {children}
                             </CardContent>
                         </Card>

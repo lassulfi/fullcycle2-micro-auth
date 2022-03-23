@@ -5,11 +5,11 @@
             var pageProps = {
                 loginEnabled: ${realm.password?string},
                 loginAction: "${url.loginAction?no_esc}",
-                <#if usernameEditDisabled?>
+                <#if usernameEditDisabled??>
                     usernameEditDisabled: true,
                 <#else>
                     usernameEditDisabled: false,
-                <#if>
+                </#if>
                 <#if !realm.loginWithEmailAllowed>
                     usernameLabel: "${msg("username")}",
                 <#elseif !realm.registrationEmailAsUsername>
@@ -22,11 +22,33 @@
                 enabledRememberMe: ${realm.rememberMe?string},
                 <#if login.rememberMe??>
                     enabledLoginRememberMe: ${login.rememberMe?string},
-                </#fi>
+                </#if>
                 rememberMeLabel: "${msg("rememberMe")}",
                 resetPasswordAllowed: ${realm.resetPasswordAllowed?string},
                 resetPasswordUrl: "${url.loginResetCredentialsUrl}",
                 resetPasswordLabel: "${msg("doForgotPassword")}",
+                <#if realm.password && realm.registrationAllowed && !registrationDisabled??>
+                    register: {
+                        label: "${msg("doRegister")}",
+                        newUserLabel: "${msg("noAccount")}",
+                        url: "${url.registrationUrl?no_esc}"
+                    },
+                </#if>
+                <#if auth.selectedCredential?has_content>
+                    selectedCredential: "${auth.selectedCredential}",
+                </#if>
+                <#if realm.password && social.providers??>
+                    socialProviders: [
+                        <#list social.providers as p>
+                            {
+                                loginUrl: "${p.loginUrl?no_esc}",
+                                alias: "${p.alias}",
+                                providerId: "${p.providerId}",
+                                displayName: "${p.displayName}"
+                            },
+                        </#list>
+                    ]
+                </#if>
             };
         </script>
         <%= htmlWebpackPlugin.tags.bodyTags %>

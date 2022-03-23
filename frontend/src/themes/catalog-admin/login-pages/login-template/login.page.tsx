@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import reportWebVitals from '../../../../reportWebVitals';
-import { Box, Button, Checkbox, CssBaseline, FormControlLabel, Grid, Link, MuiThemeProvider, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, CssBaseline, Divider, FormControlLabel, Grid, Link, List, ListItem, ListItemIcon, ListItemText, MuiThemeProvider, TextField } from '@material-ui/core';
 import theme from '../../../../theme';
 import Layout, { LayoutProps } from '../../components/Layout';
+import { GitHub as GitHubIcon } from "@material-ui/icons";
 
 declare const layoutProps: LayoutProps;
 declare const pageProps: LoginPageProps;
@@ -21,6 +22,22 @@ interface LoginPageProps {
     resetPasswordAllowed: boolean;
     resetPasswordUrl: string;
     resetPasswordLabel: string;
+    register?: {
+        label: string;
+        newUserLabel: string;
+        url: string;
+    };
+    selectedCredential?: string;
+    socialProviders?: {
+        loginUrl: string;
+        alias: string;
+        providerId: "github";
+        displayName: string;
+    }[];
+}
+
+const icons = {
+    github: <GitHubIcon />
 }
 
 const LoginPage: React.FunctionComponent<LoginPageProps> = (props) => {
@@ -37,13 +54,20 @@ const LoginPage: React.FunctionComponent<LoginPageProps> = (props) => {
         resetPasswordAllowed,
         resetPasswordUrl,
         resetPasswordLabel,
+        register,
+        selectedCredential,
+        socialProviders,
     } = props;
 
     return (
         <Box padding={2}>
             {!loginEnabled && <div>Login não habilitado. Entre em contato com o administrador</div>}
             <Grid container spacing={3} justify="space-evenly">
-                <Grid item>
+                <Grid
+                    item
+                    xs={12}
+                    sm={socialProviders ? 7 : 12}
+                >
                     <form action={loginAction} method="post">
                         <TextField
                             id="username"
@@ -81,28 +105,40 @@ const LoginPage: React.FunctionComponent<LoginPageProps> = (props) => {
                                     label={rememberMeLabel}
                                 />
                             )}
-                            {resetPasswordAllowed && (<Link
-                                href={resetPasswordUrl}
-                                color="secondary"
-                            >
-                                {resetPasswordLabel}
-                            </Link>)}
+                            {resetPasswordAllowed && (
+                                <Link
+                                    href={resetPasswordUrl}
+                                    color="secondary"
+                                >
+                                    {resetPasswordLabel}
+                                </Link>
+                            )}
                         </Grid>
                         <Grid container>
-                            <Grid item xs={7}>
-                                <div>
+                            {/* <Grid
+                                item
+                                xs={7}
+                                style={{ display: "flex", alignItems: "center" }}
+                            >
+                                {register && (<div>
+                                    {register.newUserLabel}{" "}
                                     <Link
-                                        href="#"
+                                        href={register.url}
                                         color="secondary"
                                     >
+                                        {register.label}
                                     </Link>
-                                </div>
-                            </Grid>
-                            <Grid item xs={5}>
+                                </div>)}
+                            </Grid> */}
+                            <Grid
+                                item xs={12}
+                                style={{ display: "flex", justifyContent: "flex-end" }}
+                            >
                                 <input
                                     type="hidden"
                                     id="id-hidden-input"
                                     name="credentialId"
+                                    defaultValue={selectedCredential}
                                 />
                                 <Button
                                     type="submit"
@@ -115,6 +151,32 @@ const LoginPage: React.FunctionComponent<LoginPageProps> = (props) => {
                         </Grid>
                     </form>
                 </Grid>
+                {socialProviders && (
+                    <>
+                        <Divider orientation="vertical" flexItem />
+                        <Grid item xs={12} sm={4}>
+                            <List>
+                                {socialProviders.map((socialProvider, key) => {
+                                    return (
+                                        <ListItem
+                                            key={key}
+                                            button
+                                            component="a"
+                                            href={socialProvider.loginUrl}
+                                        >
+                                            <ListItemIcon>
+                                                {icons[socialProvider.providerId]}
+                                            </ListItemIcon>
+                                            <ListItemText>
+                                                {socialProvider.displayName}
+                                            </ListItemText>
+                                        </ListItem>
+                                    )
+                                })}
+                            </List>
+                        </Grid>
+                    </>
+                )}
             </Grid>
         </Box>
     )
