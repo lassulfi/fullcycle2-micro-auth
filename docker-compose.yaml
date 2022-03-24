@@ -39,3 +39,10 @@ services:
     container_name: micro-auth-frontend
     volumes:
       - ./frontend:/home/node/app
+
+  test:
+    build: ./tests
+    entrypoint: ./.docker/entrypoint.sh
+    container_name: micro-auth-test
+    volumes:
+      - ./tests:/home/node/app

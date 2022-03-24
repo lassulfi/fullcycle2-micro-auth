@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.prod
+    container_name: micro-auth-prod-app
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - DB_VENDOR=h2
+    ports:
+      - 8080:8080
