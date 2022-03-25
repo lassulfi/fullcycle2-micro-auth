@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
-        "types": ["jest"]
+        "types": ["jest", "node", "selenium-webdriver"],
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true
     }
 }

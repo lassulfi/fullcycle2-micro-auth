@@ -8,9 +8,11 @@ services:
     volumes:
       - ./frontend/build/catalog-admin:/opt/jboss/keycloak/themes/catalog-admin
       - ./keycloak/config/standalone-ha.xml:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
+      - ./keycloak/test-realm-export.json:/tmp/test-realm-export.json
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
+      - KEYCLOAK_IMPORT=/tmp/test-realm-export.json
       - DB_ADDR=db
       - DB_VENDOR=mysql
       - DB_DATABASE=micro_auth
@@ -21,6 +23,10 @@ services:
       - 8080:8080
     depends_on:
       - db
+    networks:
+      default:
+        aliases:
+          - app.test
   
   db:
     build: ./.docker/mysql
@@ -32,6 +38,8 @@ services:
     environment:
       - MYSQL_DATABASE=micro_auth
       - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - default
 
   frontend:
     build: ./frontend
@@ -39,6 +47,8 @@ services:
     container_name: micro-auth-frontend
     volumes:
       - ./frontend:/home/node/app
+    networks:
+      - default
 
   test:
     build: ./tests
@@ -46,3 +56,14 @@ services:
     container_name: micro-auth-test
     volumes:
       - ./tests:/home/node/app
+    networks:
+      - default
+
+  selenium:
+    image: selenium/standalone-chrome:88.0.4324.150-chromedriver-88.0.4324.96
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
